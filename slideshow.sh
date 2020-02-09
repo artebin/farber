@@ -23,13 +23,17 @@ if [[ -f "${CURRENT_IMAGE_FILE}" ]]; then
 	rm -f "${CURRENT_IMAGE_FILE}"
 fi
 cp empty.jpg "${CURRENT_IMAGE_FILE}"
-feh -R 2 "${CURRENT_IMAGE_FILE}" &
+feh -R 5 "${CURRENT_IMAGE_FILE}" &
 FEH_PID=$?
 
-IMAGE_FIFO="flick_images.fifo"
 while true; do
-	if read IMAGE <"${IMAGE_FIFO}"; then
+	IMAGE=$(flock -x FLICKR_IMAGE_LIST head -n 1 FLICKR_IMAGE_LIST)
+	if [[ ! -z "${IMAGE}" ]]; then
+		flock -x FLICKR_IMAGE_LIST bash -c "tail -n +2 FLICKR_IMAGE_LIST | sponge FLICKR_IMAGE_LIST"
+		printf "%s\n" "${IMAGE}"
 		cp "${IMAGE}" "${CURRENT_IMAGE_FILE}"
-		sleep 1
+	else
+		printf "Cannot retrieve any image\n"
 	fi
+	sleep 5
 done

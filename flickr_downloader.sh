@@ -38,6 +38,8 @@ exit_script(){
 
 trap exit_script SIGINT SIGTERM
 
+rm -f FLICKR_IMAGE_LIST
+
 loop_retrieve_images_from_flickr_photos_public_feed(){
 	while true; do
 		IMAGES_ROOT_DIR="IMAGES"
@@ -47,9 +49,17 @@ loop_retrieve_images_from_flickr_photos_public_feed(){
 		TIME="$(date '+%H%M%S.%3N')"
 		OUTPUT_DIR="${IMAGES_ROOT_DIR}/${YEAR}/${MONTH}/${DAY}/${TIME}"
 		mkdir -p "${OUTPUT_DIR}"
+		
 		print_section_heading "Retrieve images from Flickr Photos Public Feed ${OUTPUT_DIR}"
+		
 		retrieve_images_from_flickr_photos_public_feed "${OUTPUT_DIR}"
 		readarray -d '' IMAGE_ARRAY < <(find "${OUTPUT_DIR}" -mindepth 1 -iname '*.jpg' -print0)
+		IMAGE_ARRAY_AS_LINES=""
+		for IMAGE in ${IMAGE_ARRAY[@]}; do
+			IMAGE_ARRAY_AS_LINES+="${IMAGE}\n"
+		done
+		flock -x FLICKR_IMAGE_LIST printf "${IMAGE_ARRAY_AS_LINES}" >>FLICKR_IMAGE_LIST
+		
 		print_section_ending
 	done
 }
