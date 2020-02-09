@@ -23,7 +23,7 @@ if [[ -f "${CURRENT_IMAGE_FILE}" ]]; then
 	rm -f "${CURRENT_IMAGE_FILE}"
 fi
 cp empty.jpg "${CURRENT_IMAGE_FILE}"
-feh -R 5 "${CURRENT_IMAGE_FILE}" &
+feh -R 5 -Z --image-bg black "${CURRENT_IMAGE_FILE}" &
 FEH_PID=$?
 
 while true; do
